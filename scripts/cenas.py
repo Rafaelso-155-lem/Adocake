@@ -45,8 +45,9 @@ class Partida:
         # fundo fase 1
         self.bg_color = (135, 206, 235)
 
-        # fundo fase 2 (imagem)
         assets = os.path.join(os.path.dirname(__file__), "..", "assets")
+
+        # fundo fase 2
         try:
             self.bg_fase2 = pygame.image.load(
                 os.path.join(assets, "santuario.png")
@@ -57,6 +58,28 @@ class Partida:
             )
         except:
             self.bg_fase2 = None
+
+        # fundo fase 3 (ESPAÇO)
+        try:
+            self.bg_fase3 = pygame.image.load(
+                os.path.join(assets, "espaço.png")
+            ).convert()
+            self.bg_fase3 = pygame.transform.scale(
+                self.bg_fase3,
+                (tela.get_width(), tela.get_height())
+            )
+        except:
+            self.bg_fase3 = None
+
+        # imagem da vitória (Ado dominando o mundo)
+        try:
+            self.img_vitoria = pygame.image.load(
+                os.path.join(assets, "adominacao.png")
+            ).convert_alpha()
+            self.img_vitoria = pygame.transform.scale(self.img_vitoria, (260, 260))
+        except:
+            self.img_vitoria = None
+
 
     def reiniciar(self):
         self.jogador = Jogador(self.tela)
@@ -92,7 +115,6 @@ class Partida:
         teclas = pygame.key.get_pressed()
         self.jogador.atualizar(teclas)
 
-        # spawn de bolos
         self.spawn_timer += 1
         if self.spawn_timer > self.spawn_interval:
             vel = self.vel_base + (self.fase * 0.8)
@@ -102,7 +124,6 @@ class Partida:
         for bolo in list(self.bolos):
             bolo.atualizar()
 
-            # pegou o bolo
             if bolo.rect.colliderect(self.jogador.getRect()):
                 self.bolos.remove(bolo)
                 self.pontos += 1
@@ -110,7 +131,6 @@ class Partida:
                 self.verificar_fase()
                 continue
 
-            # bolo caiu
             if bolo.saiu_da_tela():
                 self.bolos.remove(bolo)
                 self.erros += 1
@@ -136,13 +156,15 @@ class Partida:
         if self.fase == 1:
             self.tela.fill(self.bg_color)
 
-            # nuvens
             pygame.draw.ellipse(self.tela, (255,255,255), (40, 60, 160, 70))
             pygame.draw.ellipse(self.tela, (255,255,255), (220, 40, 180, 80))
             pygame.draw.ellipse(self.tela, (255,255,255), (120, 140, 200, 90))
 
         elif self.fase == 2 and self.bg_fase2:
             self.tela.blit(self.bg_fase2, (0, 0))
+
+        elif self.fase == 3 and self.bg_fase3:
+            self.tela.blit(self.bg_fase3, (0, 0))
 
         else:
             self.tela.fill((40, 40, 40))
@@ -158,15 +180,61 @@ class Partida:
             self.botaoJogar.desenhar()
             return
 
-        # VITÓRIA
+        
+        # vitoria
         if self.estado == "vitoria":
-            font = pygame.font.SysFont(None, 56)
-            msg = font.render("VOCÊ ZEROU O JOGO!", True, (20, 40, 120))
+            # fundo preto
+            self.tela.fill((0, 0, 0))
+
+            # títulos (texto quebrado em duas linhas)
+            font = pygame.font.SysFont(None, 30)
+
+            linha1 = font.render(
+                "VOCÊ ZEROU O JOGO!",
+                True,
+                (255, 255, 255)
+            )
+            linha2 = font.render(
+                "E CONQUISTOU A ADOminação DO MUNDO",
+                True,
+                (255, 255, 255)
+            )
+
             self.tela.blit(
-                msg,
-                msg.get_rect(center=(self.tela.get_width()//2, 220))
+                linha1,
+                linha1.get_rect(center=(self.tela.get_width()//2, 90))
+            )
+            self.tela.blit(
+                linha2,
+                linha2.get_rect(center=(self.tela.get_width()//2, 130))
+            )
+
+            # quadrado da imagem
+            caixa_rect = pygame.Rect(
+                self.tela.get_width()//2 - 130,
+                170,
+                260,
+                260
+            )
+            pygame.draw.rect(self.tela, (255, 255, 255), caixa_rect, 2)
+
+            # imagem da Ado (se existir)
+            if self.img_vitoria:
+                self.tela.blit(self.img_vitoria, caixa_rect.topleft)
+
+            # instrução
+            font2 = pygame.font.SysFont(None, 32)
+            inst = font2.render(
+                "Pressione ENTER para jogar novamente",
+                True,
+                (200, 200, 200)
+            )
+            self.tela.blit(
+                inst,
+                inst.get_rect(center=(self.tela.get_width()//2, 460))
             )
             return
+
 
         # JOGO
         self.jogador.desenhar()
