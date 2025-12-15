@@ -11,6 +11,12 @@ class Partida:
         self.tela = tela
         self.estado = "menu"
 
+        # transição de fases
+        self.estado_anterior = None
+        self.timer_transicao = 0
+        self.duracao_transicao = 120  # 2 segundos (60 FPS)
+
+
         self.jogador = Jogador(tela)
         self.bolos = []
 
@@ -103,13 +109,17 @@ class Partida:
         if self.estado == "menu":
             self.botaoJogar.checarClique(evento)
 
-        if evento.type == pygame.KEYDOWN:
+        if evento.type == pygame.KEYUP:
             if evento.key in (pygame.K_SPACE, pygame.K_RETURN):
                 if self.estado in ("menu", "vitoria"):
                     self.reiniciar()
 
+
     def atualizar(self):
-        if self.estado != "partida":
+        if self.estado == "transicao":
+            self.timer_transicao += 1
+            if self.timer_transicao >= self.duracao_transicao:
+                self.estado = "partida"
             return
 
         teclas = pygame.key.get_pressed()
@@ -148,29 +158,25 @@ class Partida:
                 self.vel_base += 1
                 self.bolos.clear()
                 self.faseTexto.atualizarTexto(f"Fase: {self.fase}")
+
+                # inicia transição
+                self.estado_anterior = "partida"
+                self.estado = "transicao"
+                self.timer_transicao = 0
             else:
                 self.estado = "vitoria"
 
+
     def desenhar(self):
-        # FUNDO
-        if self.fase == 1:
+
+        # MENU
+        if self.estado == "menu":
             self.tela.fill(self.bg_color)
 
             pygame.draw.ellipse(self.tela, (255,255,255), (40, 60, 160, 70))
             pygame.draw.ellipse(self.tela, (255,255,255), (220, 40, 180, 80))
             pygame.draw.ellipse(self.tela, (255,255,255), (120, 140, 200, 90))
 
-        elif self.fase == 2 and self.bg_fase2:
-            self.tela.blit(self.bg_fase2, (0, 0))
-
-        elif self.fase == 3 and self.bg_fase3:
-            self.tela.blit(self.bg_fase3, (0, 0))
-
-        else:
-            self.tela.fill((40, 40, 40))
-
-        # MENU
-        if self.estado == "menu":
             font = pygame.font.SysFont(None, 64)
             titulo = font.render("ADO CAKE GAME", True, (20, 40, 120))
             self.tela.blit(
@@ -180,13 +186,11 @@ class Partida:
             self.botaoJogar.desenhar()
             return
 
-        
-        # vitoria
+
+        # VITÓRIA
         if self.estado == "vitoria":
-            # fundo preto
             self.tela.fill((0, 0, 0))
 
-            # títulos (texto quebrado em duas linhas)
             font = pygame.font.SysFont(None, 30)
 
             linha1 = font.render(
@@ -209,7 +213,6 @@ class Partida:
                 linha2.get_rect(center=(self.tela.get_width()//2, 130))
             )
 
-            # quadrado da imagem
             caixa_rect = pygame.Rect(
                 self.tela.get_width()//2 - 130,
                 170,
@@ -218,11 +221,9 @@ class Partida:
             )
             pygame.draw.rect(self.tela, (255, 255, 255), caixa_rect, 2)
 
-            # imagem da Ado (se existir)
             if self.img_vitoria:
                 self.tela.blit(self.img_vitoria, caixa_rect.topleft)
 
-            # instrução
             font2 = pygame.font.SysFont(None, 32)
             inst = font2.render(
                 "Pressione ENTER para jogar novamente",
@@ -234,6 +235,52 @@ class Partida:
                 inst.get_rect(center=(self.tela.get_width()//2, 460))
             )
             return
+
+
+        # TRANSIÇÃO DE FASE
+        if self.estado == "transicao":
+            self.tela.fill((0, 0, 0))
+
+            font = pygame.font.SysFont(None, 56)
+            titulo = font.render(f"FASE {self.fase}", True, (255, 255, 255))
+            self.tela.blit(
+                titulo,
+                titulo.get_rect(center=(self.tela.get_width()//2, 200))
+            )
+
+            font2 = pygame.font.SysFont(None, 32)
+
+            if self.fase == 2:
+                subtitulo = "SANTUÁRIO MALEVOLENTE"
+            elif self.fase == 3:
+                subtitulo = "DOMÍNIO DO ESPAÇO TEMPO"
+            else:
+                subtitulo = ""
+
+            sub = font2.render(subtitulo, True, (200, 200, 200))
+            self.tela.blit(
+                sub,
+                sub.get_rect(center=(self.tela.get_width()//2, 250))
+            )
+            return
+
+
+        # FUNDO DO JOGO (somente se estiver jogando)
+        if self.fase == 1:
+            self.tela.fill(self.bg_color)
+
+            pygame.draw.ellipse(self.tela, (255,255,255), (40, 60, 160, 70))
+            pygame.draw.ellipse(self.tela, (255,255,255), (220, 40, 180, 80))
+            pygame.draw.ellipse(self.tela, (255,255,255), (120, 140, 200, 90))
+
+        elif self.fase == 2 and self.bg_fase2:
+            self.tela.blit(self.bg_fase2, (0, 0))
+
+        elif self.fase == 3 and self.bg_fase3:
+            self.tela.blit(self.bg_fase3, (0, 0))
+
+        else:
+            self.tela.fill((40, 40, 40))
 
 
         # JOGO
