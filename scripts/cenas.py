@@ -252,7 +252,7 @@ class Partida:
 
             if self.fase == 1:
                  subtitulo = "O INÍCIO DE UM SONHO"
-            elif self.fase == 2:subtitulo = "SANTUÁRIO DA MALEVOLENTE"
+            elif self.fase == 2:subtitulo = "SANTUÁRIO MALEVOLENTE"
             elif self.fase == 3:subtitulo = "DOMÍNIO DO ESPAÇO TEMPO"
             else:
                  subtitulo = ""
