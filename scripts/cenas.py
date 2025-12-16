@@ -250,12 +250,13 @@ class Partida:
 
             font2 = pygame.font.SysFont(None, 32)
 
-            if self.fase == 2:
-                subtitulo = "SANTUÁRIO MALEVOLENTE"
-            elif self.fase == 3:
-                subtitulo = "DOMÍNIO DO ESPAÇO TEMPO"
+            if self.fase == 1:
+                 subtitulo = "O INÍCIO DE UM SONHO"
+            elif self.fase == 2:subtitulo = "SANTUÁRIO DA MALEVOLENTE"
+            elif self.fase == 3:subtitulo = "DOMÍNIO DO ESPAÇO TEMPO"
             else:
-                subtitulo = ""
+                 subtitulo = ""
+
 
             sub = font2.render(subtitulo, True, (200, 200, 200))
             self.tela.blit(
@@ -272,6 +273,14 @@ class Partida:
             pygame.draw.ellipse(self.tela, (255,255,255), (40, 60, 160, 70))
             pygame.draw.ellipse(self.tela, (255,255,255), (220, 40, 180, 80))
             pygame.draw.ellipse(self.tela, (255,255,255), (120, 140, 200, 90))
+            # sol
+            pygame.draw.circle(self.tela, (255, 215, 0),
+                   (self.tela.get_width() - 50, 50), 30)
+
+            pygame.draw.circle(self.tela, (255, 235, 120),
+                   (self.tela.get_width() - 50, 50), 25)
+
+
 
         elif self.fase == 2 and self.bg_fase2:
             self.tela.blit(self.bg_fase2, (0, 0))
